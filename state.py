@@ -78,7 +78,8 @@ class StateMachine(object):
 
 class AntStateExploring(State):
     """
-    The Exploring State for Ants. The ant moves randomly over the screen area.
+    The Exploring State for Ants.
+    The ant moves randomly over the screen area.
     """
     def __init__(self, ant):
         """
@@ -137,7 +138,8 @@ class AntStateExploring(State):
 
 class AntStateSeeking(State):
     """
-    The Seeking State for Ants. The ant moves toward a leaf that gets closer to it.
+    The Seeking State for Ants.
+    The ant moves toward a leaf that gets closer to it.
     """
 
     def __init__(self, ant):
@@ -182,7 +184,8 @@ class AntStateSeeking(State):
 
 class AntStateDelivering(State):
     """
-    The Delivering State for Ants. The ant moves toward the nest with the collected object.
+    The Delivering State for Ants.
+    The ant moves toward the nest with the collected object.
     """
 
     def __init__(self, ant):
@@ -217,3 +220,75 @@ class AntStateDelivering(State):
         random_offset = Vector2(randint(-20, 20), randint(-20, 20))
         self.ant.destination = Vector2(*NEST_POSITION) + random_offset
 
+
+class AntStateHunting(State):
+    """
+    The Delivering State for Ants.
+    The ant moves toward the spider with random speed.
+    """
+
+    def __init__(self, ant):
+        """
+        Call the base class constructor to initialize the State.
+        :param ant: ant instance that this state belongs to
+        """
+
+        State.__init__(self, "hunting")
+        self.ant = ant
+        self.got_kill = False
+
+    def do_actions(self):
+        """
+        Check conditions of the ant and environment to decide if state should change.
+        """
+
+        spider = self.ant.world.get(self.ant.spider_id)
+
+        if spider is None:
+            return
+
+        self.ant.destination = spider.location
+
+        if self.ant.location.get_distance_to(spider.location) < 15.:
+            # Give the spider a fighting chance
+            if randint(1, 5) == 1:
+                spider.bitten()
+                # If the spider is dead, move it back to the nest
+                if spider.health <= 0:
+                    self.ant.carry(spider.image)
+                    self.ant.world.remove_entity(spider)
+                    self.got_kill = True
+
+    def check_conditions(self):
+        """
+        Check conditions of the ant and environment to decide if state should change.
+        """
+
+        if self.got_kill:
+            return "delivering"
+
+        spider = self.ant.world.get(self.ant.spider_id)
+
+        # If the spider has been killed then return to exploring state
+        if spider is None:
+            return "exploring"
+
+        # If the spider gets far enough away, return to exploring state
+        if spider.location.get_distance_to(NEST_POSITION) > NEST_SIZE * 3:
+            return "exploring"
+
+        return None
+
+    def entry_actions(self):
+        """
+        Actions executed by the ant when it enter hunting state.
+        """
+
+        self.speed = 160. + randint(0, 50)
+
+    def exit_actions(self):
+        """
+        Exit state action.
+        """
+
+        self.got_kill = False
