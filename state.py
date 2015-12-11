@@ -34,7 +34,7 @@ class StateMachine(object):
     """
     def __init__(self):
         """
-        Class constructor tthat initialize states dictionary and set state to none.
+        Class constructor that initialize states dictionary and set state to none.
         """
 
         self.states = {}
@@ -85,6 +85,7 @@ class AntStateExploring(State):
         Call the base class constructor to initialize the State.
         :param ant: ant instance that this state belongs to
         """
+
         State.__init__(self, "exploring")
         self.ant = ant
 
@@ -132,4 +133,87 @@ class AntStateExploring(State):
         # Start with random speed and heading
         self.ant.speed = 120. + randint(-30, 30)
         self.random_destination()
+
+
+class AntStateSeeking(State):
+    """
+    The Seeking State for Ants. The ant moves toward a leaf that gets closer to it.
+    """
+
+    def __init__(self, ant):
+        """
+        Call the base class constructor to initialize the State.
+        :param ant: ant instance that this state belongs to
+        """
+
+        State.__init__(self, "seeking")
+        self.ant = ant
+        self.leaf_id = None
+
+    def check_conditions(self):
+        """
+        Check conditions of the ant and environment to decide if state should change.
+        """
+
+        # If the leaf is gone, then go back to exploring
+        leaf = self.ant.world.get(self.ant.leaf_id)
+        if leaf is None:
+            return "exploring"
+
+        # If we are next to the leaf, pick it up and deliver it
+        if self.ant.location.get_distance_to(leaf.location) < 5.0:
+            self.ant.carry(leaf.image)
+            self.ant.world.remove_entity(leaf)
+            return "delivering"
+
+        return None
+
+    def entry_actions(self):
+        """
+       Actions executed by the ant when it enter explore state.
+       """
+
+        # Set the destination to the location of the leaf
+        leaf = self.ant.world.get(self.ant.leaf_id)
+        if leaf is not None:
+            self.ant.destination = leaf.location
+            self.ant.speed = 160. + randint(-20, 20)
+
+
+class AntStateDelivering(State):
+    """
+    The Delivering State for Ants. The ant moves toward the nest with the collected object.
+    """
+
+    def __init__(self, ant):
+        """
+        Call the base class constructor to initialize the State.
+        :param ant: ant instance that this state belongs to
+        """
+
+        State.__init__(self, "delivering")
+        self.ant = ant
+
+    def check_conditions(self):
+        """
+        Check conditions of the ant and environment to decide if state should change.
+        """
+
+        # If inside the nest, randomly drop the object
+        if Vector2(*NEST_POSITION).get_distance_to(self.ant.location) < NEST_SIZE:
+            if randint(1, 10) == 1:
+                self.ant.drop(self.ant.world.background)
+                return "exploring"
+
+        return None
+
+    def entry_actions(self):
+        """
+        Actions executed by the ant when it enter explore state.
+        """
+
+        # Move to a random point in the nest
+        self.ant.speed = 60.
+        random_offset = Vector2(randint(-20, 20), randint(-20, 20))
+        self.ant.destination = Vector2(*NEST_POSITION) + random_offset
 
