@@ -1,10 +1,7 @@
 from random import randint
 from gameobjects.vector2 import Vector2
-from config import config
+from config import SCREEN_SIZE, NEST_POSITION, NEST_SIZE
 
-SCREEN_SIZE = config.get('screen_size', 'general')
-NEST_POSITION = config.get('position', 'nest')
-NEST_SIZE = config.get('size', 'nest')
 
 class State(object):
     """
@@ -65,7 +62,8 @@ class StateMachine(object):
 
     def set_state(self, new_state_name):
         """
-        Change states and perform any exit / entry actions
+        Change states and perform any exit / entry actions.
+
         :param new_state_name: name of the state to be set
         """
 
@@ -84,6 +82,7 @@ class AntStateExploring(State):
     def __init__(self, ant):
         """
         Call the base class constructor to initialize the State.
+
         :param ant: ant instance that this state belongs to
         """
 
@@ -191,6 +190,7 @@ class AntStateDelivering(State):
     def __init__(self, ant):
         """
         Call the base class constructor to initialize the State.
+
         :param ant: ant instance that this state belongs to
         """
 
@@ -230,12 +230,14 @@ class AntStateHunting(State):
     def __init__(self, ant):
         """
         Call the base class constructor to initialize the State.
+
         :param ant: ant instance that this state belongs to
         """
 
         State.__init__(self, "hunting")
         self.ant = ant
         self.got_kill = False
+        self.speed = 0
 
     def do_actions(self):
         """
