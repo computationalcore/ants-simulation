@@ -1,4 +1,4 @@
-from config import SCREEN_SIZE
+from config import SCREEN_SIZE, SPIDER_HEALTH
 from random import randint
 from gameobjects.vector2 import Vector2
 from state import StateMachine, AntStateExploring, AntStateSeeking, AntStateDelivering, AntStateHunting
@@ -142,7 +142,7 @@ class Spider(SimulationEntity):
 
         SimulationEntity.__init__(self, world, "spider", image)
         self.dead_image = dead_image
-        self.health = 35
+        self.health = SPIDER_HEALTH
         self.speed = 50. + randint(-20, 20)
 
     def bitten(self):

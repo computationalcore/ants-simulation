@@ -20,7 +20,7 @@ class World(object):
         # Draw the nest (a circle) on the background
         self.background = pygame.surface.Surface(SCREEN_SIZE).convert()
         self.background.fill((255, 255, 255))
-        pygame.draw.circle(self.background, (200, 255, 200), NEST_POSITION, int(NEST_SIZE))
+        pygame.draw.circle(self.background, (200, 222, 187), NEST_POSITION, int(NEST_SIZE))
         
     def add_entity(self, entity):
         """
@@ -103,7 +103,7 @@ def run():
     pygame.init()
     screen = pygame.display.set_mode(SCREEN_SIZE, 0, 32)
 
-    pygame.display.set_caption('Ant AI Simulation')
+    pygame.display.set_caption('Ant Simulation')
         
     world = World()
     
